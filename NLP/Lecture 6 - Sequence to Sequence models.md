@@ -37,10 +37,6 @@ Three gates:
 **Hidden state** is doing multiple things  
 - One part is, feed it into the **output, predict the next token**  
 - Second, **store information about the past** for future use  
-
-![[Pasted image 20250914210318.png]]
-
-![[Pasted image 20250915074329.png]]
 The **addition** between the **new cell content** and the **old cell state** is the key to **preserving information.** Earlier, we used to **multiply** old and new weights. Having an **addition prevents vanishing gradient.**  
 The **forget gate** is more like a *remember gate* as a **1** on the forget gate means you remember everything from the past and a **0** means you forget everything.  
 
@@ -48,22 +44,18 @@ The **forget gate** is more like a *remember gate* as a **1** on the forget gate
 No, it is a problem for **all neural networks, especially deep ones.** Due to **chain rule,** gradient can be **vanishingly small** as it backpropagates. Thus, **lower layers are learned slowly.**
 
 ###### Alternate solution for vanishing gradient
-**Residual connections** aka *"resnet"* makes deep networks easier to train by having an **identity connection** that preserves information.
-![[Pasted image 20250915080314.png]]
+**Residual connections** aka *"resnet"* makes deep networks easier to train by having an **identity connection** that preserves information
 
 #### Other uses of RNNs
 - **Part of speech tagging:** *named entity recognition,* identifying which word is a noun, verb etc.  
 - **Sentiment analysis:** run an **LSTM** over a sentence and use the **final hidden state** as the **sentence encoding.** Have a **classification layer** that
 
 #### Bidirectional and multi layer RNNs
-![[Pasted image 20250915081605.png]]
 For bidirectional, run a forward RNN and a backward RNN and concatenate the hidden states together. 
 Not applicable to language modeling as we only have left context available. 
 
 ###### Multi layer RNNs
 Here, the hidden states from RNN layer i are inputs to RNN layer i + 1.
-![[Pasted image 20250915082939.png]]
-
 #### Neural machine translation
 In 2014, we from from statistical to neural machine translation.
 1. **Encoder-Decoder Model:** NMT uses a **sequence-to-sequence model** consisting of two main parts: an encoder and a decoder (1:06:03).

@@ -30,11 +30,8 @@ For neural machine translation, the sentence in one language was converted into 
 On each step of the decoder we are going to insert connections to the encoder to look up particular words in the sentence. 
 We compare the hidden state we give to the decoder with the hidden state at each step of the encoder to calculate an attention score. Put them into a softmax and get a probability distribution of different words in the sentence. Use this weighting to get a weighted average of the different encoder states. Take that attention output and combine it with the hidden state of our decoder and use both of them together to generate an output vector which we put through our softmax to generate the first word of our translation. 
 
-![[Pasted image 20250915201935.png]]
-
 A simple way to calculate the attention is to take the dot product of the hidden state of the encoder and the hidden state of the decoder and put a softmax on that.
 Use the probabilities from the softmax to get a weighted sum of the encoder hidden states. Finally, concatenate this output with the decoder hidden state and proceed as in the non attention seq2seq model.
-![[Pasted image 20250915201856.png]]
 
 - Attention is more human like process of translation as you can look back at the source sentence while translating rather than needing to remember it all
 - Solves the bottleneck problem as the decoder can look directly at source and bypass the bottleneck. The bottleneck problem that attention solves in neural networks is the limitation imposed by relying on a fixed-length context vector to represent the entire input sequence, which particularly affects performance on long or complex inputs.
