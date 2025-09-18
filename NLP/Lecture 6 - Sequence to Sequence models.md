@@ -20,8 +20,6 @@ If gradient is too big then the **SGD update becomes too big.** This leads to **
 ###### Gradient clipping
 If the **norm of the gradient is greater than some threshold,** scale it down before applying SGD to solve exploding gradient. Norm could refer to the **L2 norm** where we take the square root of the sum of squares of all the gradients components and then **divide the gradient by that.**
 
-![[Pasted image 20250914210351.png]]
-
 #### LSTM
 On step t, there is a **hidden state h** and a **cell state c.** Both are vectors of length *n*, the cell stores **long term information.** The LSTM can **read, erase, and write information** from the cell. The cell becomes like *RAM* on the computer. 
 The selection of which information is **erased, written or read** is controlled by three corresponding **gates.** Each gate is a probability that is calculated. The gates are also vectors of length *n.* On each timestep, each element of the gates can be **open, closed, or in between.** These gates are **dynamic.** Their value is computed based on **current context.** 
