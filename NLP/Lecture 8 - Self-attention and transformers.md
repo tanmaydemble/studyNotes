@@ -50,3 +50,36 @@ To use self-attention in decoders, we need to ensure that we can't peek at the f
 ![[Pasted image 20250917211319.png]]
 This ensures that if i which is the current word that we are looking at comes after j then we can use it as input and get scores otherwise it is -inf which becomes 0 when put through softmax. 
 You need to mask attention for decoders because they are often used in **autoregressive tasks**, meaning they generate a sequence one element at a time, predicting the next word based on the previous ones.
+
+#### Multi-head self attention
+###### Sequence stacked form of attention
+Same as the attention block but instead of treating each input vector separately, we create a matrix by concatenating the input vectors. This makes the computation on GPUs faster. 
+
+The point of multi-head attention is to enable the model to attend to different aspects of the input sequence _independently_ and _simultaneously_. By splitting the `D` dimensions of the word vector into `H` parts (where `D/H` is the dimension of each head), each "head" can learn to focus on different types of relationships or information within the sequence.
+For example, one head might learn to identify syntactic dependencies (like subject-verb agreement), while another might focus on semantic relationships or coreference (e.g., what "it" refers to). These "different things" are learned through separate sets of query, key, and value matrices for each head.
+![[Pasted image 20250918173857.png]]
+#### Scaled dot product
+When dimensionality d becomes large, dot products become large as we are multiplying and adding more numbers. Because of this, inputs to the softmax function can be large making the gradients small. Hence, we divide the attention score by $sqrt(d/h)$.
+1. **Softmax Saturation:** The softmax function takes these scores and turns them into probabilities (weights that sum to 1). If one score is significantly larger, the softmax will push its corresponding probability very close to 1, and all other probabilities very close to 0. This is called **saturation**.
+2. **Flat Gradient:** When the output of a function (like softmax) is very close to 0 or 1, the gradient of that function becomes very small. Imagine a very steep hill (large gradient) that flattens out at the top or bottom (small gradient). Once the softmax output is "saturated," small changes in the input (the large dot product) barely change the output probability.
+
+#### Residual connections
+- **Easier Training:** They help models train much better, especially very deep ones.
+- **Alleviating Gradient Problems:** In deep networks, gradients can become very small (vanishing) or very large (exploding) as they propagate back through many layers. Residual connections provide a "shortcut" for the gradient to flow directly back to earlier layers- which helps prevent vanishing gradients and stabilizes training.
+- **Identity Function Initialization:** At initialization, when weights are small, the layer's contribution is minimal. Adding the input makes the combined output resemble the identity function, which can be a good starting point for learning.
+- You can think of it as the network learning a "residual" (the difference) from the identity mapping, rather than learning the entire transformation from scratch.
+![[Pasted image 20250918175300.png]]
+
+#### Layer normalization
+- Helps model train faster.
+- For **layer normalization**, you calculate the mean and standard deviation by **averaging the values across all the dimensions (features) of a single word vector**.
+- Then, each dimension of that specific word vector is adjusted using this calculated mean and standard deviation. This process is done independently for _every single word vector_ in your sequence and batch
+- Without normalization, the values within a word's vector might vary wildly (some very large, some very small) in different layers or at different points in training. This "uninformative variation" can make it harder for the next layer to learn effectively
+- Layer normalization ensures that the input to the subsequent layer always has a consistent scale, making the learning process more predictable and efficient
+- Each individual word vector (across its dimensions) to have a unit mean (average of 0) and unit standard deviation (standard deviation of 1)
+
+#### Cross attention
+In this the queries are from the input vectors in the decoder whereas the key and value is from the output vector in the encoder. You simply apply the key matrix and the value matrix to the output of the encoder and the query matrix to the input of the decoder. 
+
+#### Quadratic computer problem
+Self attention computation is quadratic. This means our attention can't be on a bigger part of the document. 
