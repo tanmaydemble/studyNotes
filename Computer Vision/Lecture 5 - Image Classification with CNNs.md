@@ -1,0 +1,39 @@
+The upstream gradients always have the shape of our outputs whereas the downstream gradients always have the shape of our inputs. This is because upstream gradient means if we wiggle our output a little bit or if the output is a matrix then if we wiggle each element in our output a little bit then how much does the loss change. The shape of this will be the shape of output as the loss is a scalar. 
+#### Convolutional Layer
+- **Filters (Kernels):** Instead of using a large weight matrix for the entire input, convolutional layers use small, learnable **filters** (also called kernels). These filters are tiny sub-images (e.g., 5x5 pixels with 3 color channels, as shown at 33:16).
+- **Template Matching:** Each filter acts as a "template" that slides across the entire input image (or feature map from a previous layer). At each position, it computes a **dot product** (or inner product) between its values and the corresponding small "chunk" of the input image it's currently on (33:37).
+- **Activation Map:** The result of this dot product is a single number, indicating how well that specific chunk of the image matches the filter's template. As the filter slides across the entire image, these numbers are collected into a 2D plane called an **activation map** or feature map (34:28).
+- **Multiple Filters:** A convolutional layer typically uses multiple filters (e.g., six filters at 35:32). Each filter learns to detect a different feature (like edges, corners, or specific color patterns), producing its own activation map. These maps are then stacked together to form the output of the convolutional layer.
+- **Parameter Learning:** These filters are not hand-designed; their values are learned through **gradient descent and backpropagation** during the training process (37:06). This allows the network to automatically discover the most relevant features for the task.
+- **Preserving Spatial Structure:** Unlike fully connected layers that flatten an image into a 1D vector (30:50), convolutional layers maintain the 2D (or 3D with channels) spatial structure of the input, which is crucial for image processing (22:32).
+#### Why is the activation map 28 by 28 when the input picture is 32 by 32 ? 
+The size reduction happens because of the way the filter slides across the image. When a filter, say 5x5, moves over a 32x32 image without any special handling, it can only fully "fit" in a certain number of positions.
+The video explains this with the formula for the output spatial dimension (W') given an input width (W) and kernel size (K): **W' = W - K + 1**.
+In your example:
+- Input width (W) = 32
+- Filter size (K) = 5 (as mentioned at 33:16 and 35:01)
+So, for the width (and height, assuming a square image and filter): Output size = 32 - 5 + 1 = 28
+This means that a 32x32 input convolved with a 5x5 filter will result in a 28x28 activation map.
+#### Cross validation
+Splitting the data into subsets or folds.  - For example, if you have 5 folds, you'd train on folds 1-4 and validate on fold 5, then train on 1-3 and 5 and validate on fold 4, and so on.  After completing all iterations, you average the performance metric across the different validation folds for each hyperparameter combination. By using cross-validation, you prevent your model from being over-tuned to a single training/validation split and get a more reliable estimate of which number of filters (or other hyperparameters) allows your network to generalize best to new, unseen data.
+#### How do the filters learn different features?
+We initialize the filters randomly. If the filters are initialized to be the same value then the same gradient will be calculated with respect to the same loss resulting in the same filters after backpropagation. Hence, the model won't learn different features. 
+#### Padding
+The problem with moving a filter over an image is that the feature maps shrink with each layer. Padding helps with keeping the input and output size the same. It is common to set P = (K - 1) / 2.
+#### Receptive field of a layer
+The **receptive field** of a convolution refers to the region in the original input image that influences a particular activation (a single pixel value) in the output feature map of a convolutional layer. Each successive convolution adds K -1 to the receptive field size. With L layers the receptive field size is 1 + L * (K - 1). When you stack multiple convolutional layers, the receptive field grows. An activation in the second convolutional layer is computed from a local region of the first layer's output, but that local region, in turn, was computed from a larger area of the original input. This "magnifies" the effective receptive field through the network.  A larger receptive field allows deeper layers of the network to "see" and integrate information from a wider context in the image. This is crucial for recognizing larger objects or complex patterns that span across a wider area of the image.
+#### Stride and Pooling
+Receptive fields can grow faster by introducing **strided convolutions** or by using **pooling layers**. If we don't use these then the we would need multiple layers to grow the receptive fields. 
+Here's how they help:
+1. **Strided Convolutions:**
+    - Normally, a filter slides across the input one pixel at a time (stride 1). A strided convolution, however, makes the filter "skip" pixels as it moves (e.g., a stride of 2 means it moves 2 pixels at a time) (54:24).
+    - This effectively **downsamples** the feature map in the spatial dimensions.
+    - As the video explains, when you stack strided convolutions, the effective receptive field grows **exponentially** with the depth of the network (55:19-55:46). This allows the network to capture information from much larger areas of the original image with fewer layers.![[Pasted image 20250929134617.png]]![[Pasted image 20250929134642.png]]![[Pasted image 20250929134713.png]]![[Pasted image 20250929135100.png]]
+	 2. **Pooling Layers (like Max Pooling):**
+    - Pooling layers are another common way to downsample feature maps. For example, a 2x2 max-pooling layer with a stride of 2 will take a 2x2 region and replace it with its maximum value, effectively reducing the spatial dimensions by half (1:01:00).
+    - While pooling layers don't have learnable parameters like convolutional filters, they still reduce the spatial resolution. This reduction means that subsequent convolutional layers will operate on a smaller feature map, and their fixed kernel size will therefore cover a proportionally larger area of the _original_ input image, leading to a faster increase in the effective receptive field.
+#### Translational equivariance
+If you take an image, perform a convolution or pooling operation, and then _translate_ (shift) the resulting feature map, you will get the _same result_ as if you had first translated the original image and _then_ performed the convolution or pooling operation. The order of translation and the operation doesn't change the outcome, just the position of the features.
+In simpler terms:
+ If a CNN detects a cat in the top-left corner of an image, and you then shift that _exact same cat_ to the bottom-right corner of a new image, the convolutional layers will still detect a cat, but its activation will now appear in the bottom-right of the feature map, reflecting the shift.
+Why is this important for image processing? It means that the features extracted by a convolutional network depend on the **content** of the image, not on its **absolute location**. This allows CNNs to be highly effective at recognizing patterns or objects regardless of where they appear in the image, which is a fundamental requirement for most computer vision tasks.
