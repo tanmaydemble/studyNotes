@@ -1,1 +1,3 @@
 .smart-env/*
+*.png
+.obsidian/*
